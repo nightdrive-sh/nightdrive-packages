@@ -39,7 +39,7 @@ Nightdrive's `install.sh` does this itself, with `includepkgs` limiting the repo
 | hyprpolkitagent | 0.2.0 | Polkit authentication agent |
 | hyprland-guiutils | 0.2.2 | Hyprland's dialogs (hyprland-dialog, update screen) |
 | ghostty | 1.3.1 | Terminal (Install › Software › Terminals): not in Fedora or on Flathub |
-| deck | 0.1.0 | Nightdrive's Spotify player (the Deck app), so it isn't compiled on every machine |
+| deck | 0.1.1 | Nightdrive's Spotify player (the Deck app), so it isn't compiled on every machine |
 
 Each lives in its own folder as `<name>/<name>.spec`. The sources are downloaded from the spec's `Source` URLs, so the
 repo holds only specs. Ghostty's Zig dependencies can't be: `ghostty/sources.sh` fetches them when the SRPM is made, and

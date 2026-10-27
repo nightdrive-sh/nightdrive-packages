@@ -5,7 +5,7 @@
 # Releases).
 
 Name:           deck
-Version:        0.1.0
+Version:        0.1.1
 Release:        1%{?dist}
 Summary:        Spotify player for the terminal, built around your own album shelf
 
@@ -54,5 +54,9 @@ RUSTFLAGS="%{build_rustflags}" cargo test -j%{_smp_build_ncpus} --profile rpm --
 %{_datadir}/icons/hicolor/scalable/apps/deck.svg
 
 %changelog
+* Tue Oct 27 2026 Jari Lehtinen <jari@feature.fi> - 0.1.1-1
+- Pausing no longer hangs the player on pipewire-alsa 1.6.10 (Deck's own ALSA output)
+- One Deck at a time: a lock on $XDG_RUNTIME_DIR/deck/deck.lock from the start
+
 * Fri Oct 23 2026 Jari Lehtinen <jari@feature.fi> - 0.1.0-1
 - First package, for Nightdrive's Deck app
