@@ -1,0 +1,74 @@
+From 21ffd20a88ec5ce00456cd603150d6312c8989ea Mon Sep 17 00:00:00 2001
+From: Jari Lehtinen <jari@feature.fi>
+Date: Thu, 29 Oct 2026 12:34:58 +0200
+Subject: [PATCH] main: Clear a cursor of a single colour to transparent
+
+Hyprland 0.56 fills the cursor image with opaque black when the pointer is
+not on the captured output, and clients draw that as a black square where
+their pointer is.
+---
+ src/main.c | 44 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 44 insertions(+)
+
+diff --git a/src/main.c b/src/main.c
+index 4343804..354ca55 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -1997,10 +1997,54 @@ void log_image_source(struct wayvnc* self)
+ 	}
+ }
+ 
++/* Some compositors (Hyprland 0.56) fill the cursor image with opaque black
++ * when the pointer is not on the captured output, and the client then draws a
++ * black square where its pointer is. A cursor of a single colour throughout
++ * is not a real cursor, so it is cleared to transparent instead.
++ */
++static void clear_uniform_cursor(struct wv_buffer* buffer)
++{
++	if (buffer->type != WV_BUFFER_SHM || !buffer->pixels ||
++			buffer->width <= 0 || buffer->height <= 0 ||
++			buffer->stride < buffer->width * 4)
++		return;
++
++	switch (buffer->format) {
++	case DRM_FORMAT_ARGB8888:
++	case DRM_FORMAT_ABGR8888:
++	case DRM_FORMAT_RGBA8888:
++	case DRM_FORMAT_BGRA8888:
++	case DRM_FORMAT_ARGB2101010:
++	case DRM_FORMAT_ABGR2101010:
++	case DRM_FORMAT_RGBA1010102:
++	case DRM_FORMAT_BGRA1010102:
++		break;
++	default:
++		return;
++	}
++
++	uint8_t* pixels = buffer->pixels;
++	uint32_t first = *(uint32_t*)pixels;
++	if (first == 0)
++		return;
++
++	for (int y = 0; y < buffer->height; ++y) {
++		uint32_t* row = (uint32_t*)(pixels + y * buffer->stride);
++		for (int x = 0; x < buffer->width; ++x)
++			if (row[x] != first)
++				return;
++	}
++
++	nvnc_log(NVNC_LOG_DEBUG, "Cursor is a single colour; making it transparent");
++	for (int y = 0; y < buffer->height; ++y)
++		memset(pixels + y * buffer->stride, 0, buffer->width * 4);
++}
++
+ static void wayvnc_process_cursor(struct wayvnc* self, struct wv_buffer* buffer,
+ 		struct image_source* source)
+ {
+ 	nvnc_log(NVNC_LOG_DEBUG, "Got new cursor");
++	clear_uniform_cursor(buffer);
+ 	bool is_damaged = pixman_region_not_empty(&buffer->frame_damage);
+ 
+ 	double h_scale = 1.0;
+-- 
+2.56.0
+

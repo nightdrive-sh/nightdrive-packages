@@ -12,7 +12,7 @@
 
 Name:           wayvnc
 Version:        0.10.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A VNC server for wlroots based Wayland compositors
 
 # wayvnc and aml are ISC; neatvnc is ISC, with a few BSD-2-Clause and BSD-3-Clause files
@@ -21,6 +21,8 @@ URL:            https://github.com/any1/wayvnc
 Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1:        https://github.com/any1/aml/archive/v%{aml_version}/aml-%{aml_version}.tar.gz
 Source2:        https://github.com/any1/neatvnc/archive/v%{nvnc_version}/neatvnc-%{nvnc_version}.tar.gz
+# Hyprland 0.56 sends an opaque black cursor while the pointer is off the output: clients drew a black square (#1818)
+Patch0:         wayvnc-uniform-cursor.patch
 
 BuildRequires:  gcc
 BuildRequires:  meson
@@ -57,7 +59,7 @@ physical display attached.
 This build has neatvnc %{nvnc_version} and aml %{aml_version} built in.
 
 %prep
-%autosetup
+%autosetup -p1
 # wayvnc's meson.build takes subprojects/aml and subprojects/neatvnc over the system's when they are there (neatvnc
 # finds the same aml); the top folder only, as meson flattens nested subprojects
 mkdir -p subprojects/aml subprojects/neatvnc
@@ -88,6 +90,10 @@ cp -p subprojects/neatvnc/COPYING COPYING.neatvnc
 %{_mandir}/man1/%{name}ctl.1.*
 
 %changelog
+* Thu Oct 29 2026 Jari Lehtinen <jari@feature.fi> - 0.10.2-2
+- A cursor of a single colour is sent as transparent: Hyprland's opaque black one, sent while the pointer is off
+  the output, showed on clients as a black square
+
 * Thu Oct 29 2026 Jari Lehtinen <jari@feature.fi> - 0.10.2-1
 - For Nightdrive's VNC Display on Fedora 44: neatvnc 1.0.3 and aml 1.0.0 built in (static), as their new sonames
   would replace the ones Fedora's weston-libs-backend-vnc needs

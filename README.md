@@ -46,7 +46,8 @@ Each lives in its own folder as `<name>/<name>.spec`. The sources are downloaded
 repo holds only specs. Ghostty's Zig dependencies can't be: `ghostty/sources.sh` fetches them when the SRPM is made, and
 the build uses Zig's own release of the version Ghostty needs (Fedora's is newer). Deck's crates are vendored the
 same way (`deck/sources.sh`), as COPR's builds have no network. wayvnc has neatvnc and aml built in (meson subprojects, static,
-versions at the top of its spec): their 1.0 sonames would replace the ones Fedora's Weston needs. It leaves the COPR
+versions at the top of its spec): their 1.0 sonames would replace the ones Fedora's Weston needs. Its patch (Hyprland's
+black cursor off the output) is beside the spec, and `wayvnc/sources.sh` puts it with the sources. It leaves the COPR
 once Fedora's own wayvnc is 0.10 or later, and the weekly check doesn't see neatvnc's and aml's releases. Most of the Hyprland specs come from the `arcaneon/arcos` COPR by Christoph Pracht (their changelogs keep his
 entries); hyprwire, hyprlock and hypridle were written here, as their arcos sources were no longer available.
 
