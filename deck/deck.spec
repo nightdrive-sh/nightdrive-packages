@@ -5,7 +5,7 @@
 # Releases).
 
 Name:           deck
-Version:        0.1.1
+Version:        0.1.2
 Release:        1%{?dist}
 Summary:        Spotify player for the terminal, built around your own album shelf
 
@@ -54,6 +54,10 @@ RUSTFLAGS="%{build_rustflags}" cargo test -j%{_smp_build_ncpus} --profile rpm --
 %{_datadir}/icons/hicolor/scalable/apps/deck.svg
 
 %changelog
+* Thu Oct 29 2026 Jari Lehtinen <jari@feature.fi> - 0.1.2-1
+- deck status --json: what the running Deck plays, its position and queue, for scripts and Claude
+- deck ctl save <file>: writes the running Deck's playback state, for deck ctl restore to go back to
+
 * Tue Oct 27 2026 Jari Lehtinen <jari@feature.fi> - 0.1.1-1
 - Pausing no longer hangs the player on pipewire-alsa 1.6.10 (Deck's own ALSA output)
 - One Deck at a time: a lock on $XDG_RUNTIME_DIR/deck/deck.lock from the start
