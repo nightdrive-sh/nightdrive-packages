@@ -1,6 +1,6 @@
 # The order the packages build in: a line's packages need only the lines above it (and Fedora).
 # COPR builds them in this order (README › Building), and test-build.sh in a local container.
-hyprutils hyprwayland-scanner hyprland-protocols lua5.5 uwsm ghostty deck
+hyprutils hyprwayland-scanner hyprland-protocols lua5.5 uwsm ghostty deck wayvnc
 hyprlang hyprwire
 hyprgraphics hyprcursor aquamarine
 hyprtoolkit
