@@ -8,11 +8,11 @@
 # with the subprojects added; their BuildRequires are those of rawhide's neatvnc, without its examples' libpng and libsixel.
 
 %global aml_version 1.0.0
-%global nvnc_version 1.0.3
+%global nvnc_version 1.0.4
 
 Name:           wayvnc
 Version:        0.10.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A VNC server for wlroots based Wayland compositors
 
 # wayvnc and aml are ISC; neatvnc is ISC, with a few BSD-2-Clause and BSD-3-Clause files
@@ -90,6 +90,11 @@ cp -p subprojects/neatvnc/COPYING COPYING.neatvnc
 %{_mandir}/man1/%{name}ctl.1.*
 
 %changelog
+* Mon Nov 02 2026 Jari Lehtinen <jari@feature.fi> - 0.10.2-3
+- neatvnc 1.0.4: validates the pixel format a client asks for, falls back when a Tight JPEG doesn't fit its tile
+  buffer, and bounds-checks websocket HTTP headers (a stack overflow)
+- The sources are checked against sources.sha256 before the SRPM is made
+
 * Thu Oct 29 2026 Jari Lehtinen <jari@feature.fi> - 0.10.2-2
 - A cursor of a single colour is sent as transparent: Hyprland's opaque black one, sent while the pointer is off
   the output, showed on clients as a black square

@@ -48,7 +48,10 @@ the build uses Zig's own release of the version Ghostty needs (Fedora's is newer
 same way (`deck/sources.sh`), as COPR's builds have no network. wayvnc has neatvnc and aml built in (meson subprojects, static,
 versions at the top of its spec): their 1.0 sonames would replace the ones Fedora's Weston needs. Its patch (Hyprland's
 black cursor off the output) is beside the spec, and `wayvnc/sources.sh` puts it with the sources. It leaves the COPR
-once Fedora's own wayvnc is 0.10 or later, and the weekly check doesn't see neatvnc's and aml's releases. Most of the Hyprland specs come from the `arcaneon/arcos` COPR by Christoph Pracht (their changelogs keep his
+once Fedora's own wayvnc is 0.10 or later.
+
+A package with a `<name>/sources.sha256` (wayvnc, with neatvnc and aml) has its downloaded sources checked against it
+before the SRPM is made (`tools/verify-sources.sh`): an upstream archive that was re-tagged or replaced stops the build. Most of the Hyprland specs come from the `arcaneon/arcos` COPR by Christoph Pracht (their changelogs keep his
 entries); hyprwire, hyprlock and hypridle were written here, as their arcos sources were no longer available.
 
 ## Building
@@ -73,7 +76,8 @@ done
 A GitHub Actions workflow (`.github/workflows/check.yml`, Mondays, or by hand under Actions) keeps an issue open for
 each of these until the next run finds nothing:
 
-- **Upstream updates:** releases newer than the specs (`tools/check-versions.py`).
+- **Upstream updates:** releases newer than the specs (`tools/check-versions.py`), and of the libraries built into a
+  package (its `Provides: bundled(…)`: neatvnc and aml in wayvnc, glaze in Hyprland) within their major version.
 - **Broken dependencies (aarch64 / x86_64):** packages in the COPR that can't be installed on Fedora any more
   (`dnf repoclosure`), usually a Fedora library update that changed its soname. They need a rebuild.
 
@@ -81,7 +85,10 @@ Nothing is rebuilt by the workflow itself.
 
 ## Updating a package
 
-1. In `<name>/<name>.spec`: the new `Version`, `Release` back to `1`, and a `%changelog` entry.
+1. In `<name>/<name>.spec`: the new `Version`, `Release` back to `1`, and a `%changelog` entry. A package with a
+   `sources.sha256` needs the new sources' sums there: the failed build prints those of what it downloaded. Check
+   them first against a source of their own, e.g. the SHA512 in Fedora's `sources` file
+   (`src.fedoraproject.org/rpms/<name>`), as `sha512sum` gives it for the same download.
 2. `./test-build.sh <name>` builds it in a Fedora container (Podman) against the RPMs of an earlier full
    `./test-build.sh` in `out/`. A library update needs its dependants rebuilt too: run them all.
 3. Push. COPR builds the package; when a library's soname changes, rebuild its dependants there in build order.

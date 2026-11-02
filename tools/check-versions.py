@@ -3,7 +3,10 @@
 Markdown list (nothing when all are current). Exit 0 either way; 2 when an upstream couldn't be read.
   tools/check-versions.py
 Upstream: the latest GitHub release (or tag) of the spec's github.com URL; Lua from lua.org's download list, within
-the spec's major.minor (lua5.5 stays 5.5.x). GITHUB_TOKEN, if set, avoids the API's low anonymous rate limit."""
+the spec's major.minor (lua5.5 stays 5.5.x). A library built into a package (Provides: bundled(NAME) = %{MACRO}, its
+Source a github.com archive of that macro's version: wayvnc's neatvnc and aml, Hyprland's glaze) is checked too, within
+its major version: the package pins that major (Hyprland needs glaze 7), and a fix is released in it.
+GITHUB_TOKEN, if set, avoids the API's low anonymous rate limit."""
 import glob, json, os, re, sys, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,16 +24,33 @@ def key(v):
     return [int(x) for x in re.findall(r"\d+", v)]
 
 
-def github_latest(repo):
+def github_latest(repo, major=None):
+    """The newest release; with major, the highest version tag of that major version."""
+    if major is not None:
+        return highest_tag(repo, major + ".")
     try:
         return json.loads(get(f"https://api.github.com/repos/{repo}/releases/latest", api=True))["tag_name"].lstrip("v")
     except urllib.error.HTTPError as e:
         if e.code != 404:
             raise
-    # No releases: the highest version tag
+    return highest_tag(repo)     # no releases
+
+
+def highest_tag(repo, prefix=""):
     tags = [t["name"].lstrip("v") for t in json.loads(get(f"https://api.github.com/repos/{repo}/tags?per_page=100", api=True))]
-    tags = [t for t in tags if re.fullmatch(r"\d+(\.\d+)*", t)]
+    tags = [t for t in tags if re.fullmatch(r"\d+(\.\d+)*", t) and t.startswith(prefix)]
     return max(tags, key=key) if tags else None
+
+
+def bundled(spec):
+    """(name, version, github repo) of each library the spec builds in from a github.com archive."""
+    found = []
+    for name, macro in re.findall(r"^Provides:\s*bundled\(([^)]+)\)\s*=\s*%\{(\w+)\}", spec, re.M):
+        version = re.search(r"^%%global\s+%s\s+(\S+)" % macro, spec, re.M)
+        src = re.search(r"^Source\d*:\s*https://github\.com/([^/]+/[^/]+)/archive/\S*%%\{%s\}" % macro, spec, re.M)
+        if version and src:
+            found.append((name, version.group(1), src.group(1)))
+    return found
 
 
 def lua_latest(major_minor):
@@ -61,6 +81,14 @@ for path in sorted(glob.glob(os.path.join(ROOT, "*", "*.spec"))):
         continue
     if latest and key(latest) > key(version):
         behind.append(f"- **{name}** {version} → {latest} ({url})")
+    for lib, lib_version, repo in bundled(spec):
+        try:
+            latest = github_latest(repo, major=lib_version.split(".")[0])
+        except Exception as e:
+            errors.append(f"{name} ({lib}): {e}")
+            continue
+        if latest and key(latest) > key(lib_version):
+            behind.append(f"- **{lib}** (built into {name}) {lib_version} → {latest} (https://github.com/{repo})")
 
 if behind:      # nothing at all when all are current: the workflow closes the issue on an empty report
     print("\n".join(behind))
