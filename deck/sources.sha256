@@ -1,0 +1,4 @@
+# The sha256 of Deck's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# Checked on 7.11.2026: the archive's files are those of Deck's v0.1.2 tag (4d17cd4, its pax comment) in the
+# deck repo. The vendored crates (Source1) are made by sources.sh from Cargo.lock, which pins their checksums.
+dcccd6ee2faadbb31a5c47235b266f441b617c2e851f23483531c8446a5c2614  deck-0.1.2.tar.gz

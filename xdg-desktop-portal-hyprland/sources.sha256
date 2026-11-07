@@ -1,0 +1,4 @@
+# The sha256 of xdg-desktop-portal-hyprland's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# It matched Arch Linux's own on 7.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
+# (gitlab.archlinux.org/archlinux/packaging/packages/xdg-desktop-portal-hyprland, at the commit of this version).
+3652c14f63a9666acea2c841e196782dbc0f74ea5b4783622dd04a32f08b709f  xdg-desktop-portal-hyprland-1.4.1.tar.gz

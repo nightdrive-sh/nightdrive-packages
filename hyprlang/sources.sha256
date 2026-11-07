@@ -1,0 +1,4 @@
+# The sha256 of hyprlang's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# It matched Arch Linux's own on 7.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
+# (gitlab.archlinux.org/archlinux/packaging/packages/hyprlang, at the commit of this version).
+d10a0778b646e04d83e8b90cc0f764fb96958c01a15c3c0678d95a40fc647ed5  hyprlang-0.6.8.tar.gz

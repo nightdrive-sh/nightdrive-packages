@@ -1,0 +1,4 @@
+# The sha256 of aquamarine's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# It matched Arch Linux's own on 7.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
+# (gitlab.archlinux.org/archlinux/packaging/packages/aquamarine, at the commit of this version).
+2f9de98c0bd1b7b1b09c576e390a2fef436449762fb334163c414f0c300296f2  aquamarine-0.15.1.tar.gz

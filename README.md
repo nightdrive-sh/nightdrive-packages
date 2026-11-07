@@ -50,8 +50,9 @@ versions at the top of its spec): their 1.0 sonames would replace the ones Fedor
 black cursor off the output) is beside the spec, and `wayvnc/sources.sh` puts it with the sources. It leaves the COPR
 once Fedora's own wayvnc is 0.10 or later.
 
-A package with a `<name>/sources.sha256` (wayvnc, with neatvnc and aml) has its downloaded sources checked against it
-before the SRPM is made (`tools/verify-sources.sh`): an upstream archive that was re-tagged or replaced stops the build. Most of the Hyprland specs come from the `arcaneon/arcos` COPR by Christoph Pracht (their changelogs keep his
+Each package's downloaded sources are checked against its `<name>/sources.sha256` before the SRPM is made
+(`tools/verify-sources.sh`): an upstream archive that was re-tagged or replaced stops the build. The file's comment
+says what each sum was checked against. Most of the Hyprland specs come from the `arcaneon/arcos` COPR by Christoph Pracht (their changelogs keep his
 entries); hyprwire, hyprlock and hypridle were written here, as their arcos sources were no longer available.
 
 ## Building
@@ -85,10 +86,11 @@ Nothing is rebuilt by the workflow itself.
 
 ## Updating a package
 
-1. In `<name>/<name>.spec`: the new `Version`, `Release` back to `1`, and a `%changelog` entry. A package with a
-   `sources.sha256` needs the new sources' sums there: the failed build prints those of what it downloaded. Check
-   them first against a source of their own, e.g. the SHA512 in Fedora's `sources` file
-   (`src.fedoraproject.org/rpms/<name>`), as `sha512sum` gives it for the same download.
+1. In `<name>/<name>.spec`: the new `Version`, `Release` back to `1`, and a `%changelog` entry. Its
+   `sources.sha256` needs the new sources' sums: the failed build prints those of what it downloaded. Check
+   them first against a source of their own: the SHA512 in Fedora's `sources` file (`src.fedoraproject.org/rpms/<name>`),
+   as `sha512sum` gives it for the same download, the `sha256sums` in Arch Linux's PKGBUILD for the same URL
+   (`gitlab.archlinux.org/archlinux/packaging/packages/<name>`), or upstream's own signature or checksums.
 2. `./test-build.sh <name>` builds it in a Fedora container (Podman) against the RPMs of an earlier full
    `./test-build.sh` in `out/`. A library update needs its dependants rebuilt too: run them all.
 3. Push. COPR builds the package; when a library's soname changes, rebuild its dependants there in build order.

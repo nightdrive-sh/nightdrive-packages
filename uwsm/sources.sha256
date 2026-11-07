@@ -1,0 +1,4 @@
+# The sha256 of uwsm's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# It matched Arch Linux's own on 7.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
+# (gitlab.archlinux.org/archlinux/packaging/packages/uwsm, at the commit of this version).
+7bc39c90cc56bd771076f8fe47afb0755ee51f313ca62a2d2dff37d663c5ccec  uwsm-0.27.1.tar.gz

@@ -1,0 +1,7 @@
+# The sha256 of Ghostty's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# Checked on 7.11.2026: Ghostty's tarball has a good minisign signature (its .minisig, verified with the key in
+# Ghostty's PACKAGING.md on GitHub at v1.3.1); Zig's two matched the shasum in ziglang.org/download/index.json.
+# Both Zigs are listed, as spectool downloads every Source on either architecture.
+3349d25600ffbda281197a18314f7d18791969cffe9474f0ff16a45a9ebfccdb  ghostty-1.3.1.tar.gz
+02aa270f183da276e5b5920b1dac44a63f1a49e55050ebde3aecc9eb82f93239  zig-x86_64-linux-0.15.2.tar.xz
+958ed7d1e00d0ea76590d27666efbf7a932281b3d7ba0c6b01b0ff26498f667f  zig-aarch64-linux-0.15.2.tar.xz

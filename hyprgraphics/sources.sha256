@@ -1,0 +1,4 @@
+# The sha256 of hyprgraphics's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# It matched Arch Linux's own on 7.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
+# (gitlab.archlinux.org/archlinux/packaging/packages/hyprgraphics, at the commit of this version).
+861ecaad872835922dd5745a612d7a4cc7bfc4babb1d06bc92bc63c2ac013b74  hyprgraphics-0.5.1.tar.gz

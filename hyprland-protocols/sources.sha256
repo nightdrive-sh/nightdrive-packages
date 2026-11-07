@@ -1,0 +1,4 @@
+# The sha256 of hyprland-protocols's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# It matched Arch Linux's own on 7.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
+# (gitlab.archlinux.org/archlinux/packaging/packages/hyprland-protocols, at the commit of this version).
+e41ab206d89259fdf2059fdc523c39133e23ed9efa8b0ef0de9aeed61be96e72  hyprland-protocols-0.8.0.tar.gz

@@ -1,0 +1,4 @@
+# The sha256 of hyprtoolkit's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# It matched Arch Linux's own on 7.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
+# (gitlab.archlinux.org/archlinux/packaging/packages/hyprtoolkit, at the commit of this version).
+53c41be72af97d9ede274a63c9c1034c58726d862905763ed6e5a564ae42ba6b  hyprtoolkit-0.6.0.tar.gz

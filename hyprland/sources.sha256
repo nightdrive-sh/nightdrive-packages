@@ -1,0 +1,6 @@
+# The sha256 of Hyprland's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# Checked on 7.11.2026. Hyprland's archive: its pax comment is the spec's %{commit}, and its files are those of the
+# release's source-v0.56.2.tar.gz (whose sha256 matched Arch Linux's PKGBUILD) but for the dotfiles and the
+# version header that the release fills in. glaze: matched Arch Linux's glaze 7.2.0 PKGBUILD.
+ddeb92a654fa65d41ed2add3176de4fe54eab3752441c33ca99f5e598e0571e5  Hyprland-0.56.2.tar.gz
+17dba19ae63ae48f94994f00d49d5cb3c8f1306db1046c534c4828662490b7d4  glaze-7.2.0.tar.gz

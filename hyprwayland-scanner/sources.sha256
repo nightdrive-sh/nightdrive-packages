@@ -1,0 +1,4 @@
+# The sha256 of hyprwayland-scanner's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# It matched Arch Linux's own on 7.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
+# (gitlab.archlinux.org/archlinux/packaging/packages/hyprwayland-scanner, at the commit of this version).
+05f55fd1a20d8ca81b5030980fdb7c87147749230145bdb3745af2741d617f5c  hyprwayland-scanner-0.4.6.tar.gz
