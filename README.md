@@ -5,7 +5,7 @@ built for **aarch64** (Apple Silicon with Asahi Linux) and **x86_64** in the COP
 [@nightdrive/nightdrive](https://copr.fedorainfracloud.org/coprs/g/nightdrive/nightdrive/), owned by the Fedora
 Accounts group `nightdrive` (until 21.10.2026 the personal project `jarilehtinen/nightdrive`).
 
-Fedora 44 doesn't ship Hyprland, and its Hyprland libraries are too old for Hyprland 0.56. Nightdrive used the
+Fedora 44 doesn't ship Hyprland, and its Hyprland libraries are too old for Hyprland 0.56 and later. Nightdrive used the
 `arcaneon/arcos` COPR until its aarch64 builds fell behind; this repo keeps both architectures building.
 
 ## Use
@@ -21,7 +21,7 @@ Nightdrive's `install.sh` does this itself, with `includepkgs` limiting the repo
 
 | Package | Version | What |
 | --- | --- | --- |
-| hyprutils | 0.14.2 | Shared utility library |
+| hyprutils | 0.14.3 | Shared utility library |
 | hyprwayland-scanner | 0.4.6 | Wayland protocol code generator (build tool) |
 | hyprland-protocols | 0.8.0 | Hyprland's Wayland protocol extensions |
 | lua5.5 | 5.5.1 | Lua 5.5, for Hyprland's Lua config (Fedora has 5.4) |
@@ -30,9 +30,9 @@ Nightdrive's `install.sh` does this itself, with `includepkgs` limiting the repo
 | hyprwire | 0.3.1 | Hyprland's IPC wire protocol |
 | hyprgraphics | 0.5.1 | Image loading and rendering |
 | hyprcursor | 0.1.13 | Cursor theme format |
-| aquamarine | 0.15.1 | Rendering backend |
+| aquamarine | 0.16.0 | Rendering backend |
 | hyprtoolkit | 0.6.0 | UI toolkit (hyprpolkitagent, hyprland-guiutils) |
-| hyprland | 0.56.2 | The compositor (with hyprland-uwsm) |
+| hyprland | 0.57.2 | The compositor (with hyprland-uwsm) |
 | xdg-desktop-portal-hyprland | 1.4.1 | Screen sharing and other portals |
 | hyprlock | 0.9.6 | Screen locker |
 | hypridle | 0.1.8 | Idle daemon |

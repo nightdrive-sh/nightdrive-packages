@@ -1,4 +1,4 @@
 # The sha256 of hyprutils's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
-# It matched Arch Linux's own on 7.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
+# It matched Arch Linux's own on 13.11.2026: the sha256sums of the same GitHub archive in its PKGBUILD
 # (gitlab.archlinux.org/archlinux/packaging/packages/hyprutils, at the commit of this version).
-2061b7b08c8104fb02a609553b28f6c8580e5ec38633015845f1c4553980175b  hyprutils-0.14.2.tar.gz
+87bbfc9549ed96316b0d592c16d01f58729b23a2999a5293b73eec620b40c5f5  hyprutils-0.14.3.tar.gz

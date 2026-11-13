@@ -2,7 +2,7 @@
 
 Name:           hyprtoolkit
 Version:        0.6.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Modern C++ Wayland-native GUI toolkit
 
 License:        BSD-3-Clause
@@ -63,6 +63,9 @@ Headers and pkg-config file for %{name}.
 %{_libdir}/pkgconfig/hyprtoolkit.pc
 
 %changelog
+* Fri Nov 13 2026 Jari Lehtinen <jari@feature.fi> - 0.6.0-3
+- Rebuild against aquamarine 0.16.0 (soname 15)
+
 * Sun Oct 18 2026 Christoph Pracht - 0.6.0-2
 - Rebuild against aquamarine 0.15.1 (the -1 build linked an older libaquamarine)
 

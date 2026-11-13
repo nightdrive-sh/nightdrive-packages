@@ -1,7 +1,7 @@
 # Hyprland's rendering backend library (DRM/KMS, libinput, Wayland nested).
 
 Name:           aquamarine
-Version:        0.15.1
+Version:        0.16.0
 Release:        1%{?dist}
 Summary:        Very light Linux rendering backend library
 
@@ -57,5 +57,9 @@ Headers and pkg-config file for %{name}.
 %{_libdir}/pkgconfig/aquamarine.pc
 
 %changelog
+* Fri Nov 13 2026 Jari Lehtinen <jari@feature.fi> - 0.16.0-1
+- 0.16.0, which Hyprland 0.57.1 and later need (setMaxBpc); soname 14 -> 15, so hyprland
+  and hyprtoolkit are rebuilt against it
+
 * Fri Oct 16 2026 Christoph Pracht - 0.15.1-1
 - Initial package

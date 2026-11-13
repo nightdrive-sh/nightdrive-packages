@@ -1,14 +1,14 @@
 # Hyprland compositor, ArcOS's desktop. Not packaged in Fedora 44.
 
 # Commit of the v%%{version} tag; Hyprland embeds it in `hyprctl version`.
-%global commit efb50993780079460b0cbed1363e2166a2de1d9f
+%global commit 11cbc6c577b84ffb1edf4df3fc5b6128c3ae6947
 # Hyprland pins glaze 7.x and would download it at configure time; we ship that exact
 # version as a second source so the build works offline (COPR builders have no network).
 %global glaze_version 7.2.0
 
 Name:           hyprland
-Version:        0.56.2
-Release:        3%{?dist}
+Version:        0.57.2
+Release:        1%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 
 # Hyprland: BSD-3-Clause; bundled glaze (header-only, used by hyprpm/start-hyprland): MIT
@@ -24,7 +24,8 @@ BuildRequires:  hyprwayland-scanner-devel >= 0.3.10
 BuildRequires:  hyprwire-devel
 BuildRequires:  lua5.5-devel
 BuildRequires:  udis86-devel >= 1.7.2
-BuildRequires:  pkgconfig(aquamarine) >= 0.9.3
+# 0.57.1's max_bpc backport uses aquamarine 0.16's API, though CMakeLists.txt still asks for 0.15.0
+BuildRequires:  pkgconfig(aquamarine) >= 0.16.0
 BuildRequires:  pkgconfig(cairo)
 BuildRequires:  pkgconfig(egl)
 BuildRequires:  pkgconfig(gbm)
@@ -32,10 +33,12 @@ BuildRequires:  pkgconfig(gio-2.0)
 BuildRequires:  pkgconfig(glesv2)
 BuildRequires:  pkgconfig(hyprcursor) >= 0.1.7
 BuildRequires:  pkgconfig(hyprgraphics) >= 0.5.1
-BuildRequires:  pkgconfig(hyprland-protocols) >= 0.7.0
+BuildRequires:  pkgconfig(hyprland-protocols) >= 0.8.0
 BuildRequires:  pkgconfig(hyprlang) >= 0.6.7
-BuildRequires:  pkgconfig(hyprutils) >= 0.14.0
+BuildRequires:  pkgconfig(hyprutils) >= 0.14.3
 BuildRequires:  pkgconfig(lcms2)
+# Event sounds (new in 0.57)
+BuildRequires:  pkgconfig(libcanberra)
 BuildRequires:  pkgconfig(libdrm)
 BuildRequires:  pkgconfig(libeis-1.0)
 BuildRequires:  pkgconfig(libinput) >= 1.29
@@ -116,13 +119,11 @@ rm -rf %{buildroot}%{_includedir}/glaze %{buildroot}%{_datadir}/glaze %{buildroo
 %{_datadir}/wayland-sessions/hyprland.desktop
 %{_datadir}/wayland-sessions/hyprland-uwsm.desktop
 %{_datadir}/xdg-desktop-portal/hyprland-portals.conf
+%{_libdir}/systemd/user/hyprland-session.target
 %{_mandir}/man1/Hyprland.1*
 %{_mandir}/man1/hyprctl.1*
-%{bash_completions_dir}/hyprctl
 %{bash_completions_dir}/hyprpm
-%{fish_completions_dir}/hyprctl.fish
 %{fish_completions_dir}/hyprpm.fish
-%{zsh_completions_dir}/_hyprctl
 %{zsh_completions_dir}/_hyprpm
 
 %files devel
@@ -130,6 +131,10 @@ rm -rf %{buildroot}%{_includedir}/glaze %{buildroot}%{_datadir}/glaze %{buildroo
 %{_datadir}/pkgconfig/hyprland.pc
 
 %changelog
+* Fri Nov 13 2026 Jari Lehtinen <jari@feature.fi> - 0.57.2-1
+- 0.57.2: needs hyprutils 0.14.3, aquamarine 0.16.0 and libcanberra; installs hyprland-session.target;
+  hyprctl's shell completions are gone upstream (hyprpm keeps its own)
+
 * Sun Oct 18 2026 Jari Lehtinen <jari@feature.fi> - 0.56.2-3
 - Obsoletes hyprland-uwsm, whose session file this package has now (Nightdrive COPR)
 
