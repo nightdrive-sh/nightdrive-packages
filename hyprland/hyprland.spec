@@ -8,7 +8,7 @@
 
 Name:           hyprland
 Version:        0.57.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 
 # Hyprland: BSD-3-Clause; bundled glaze (header-only, used by hyprpm/start-hyprland): MIT
@@ -69,6 +69,10 @@ Provides:       bundled(glaze) = %{glaze_version}
 # hyprland-uwsm.desktop was a subpackage of its own up to 0.56.2-1 (arcos): this package has it now
 Provides:       hyprland-uwsm = %{version}-%{release}
 Obsoletes:      hyprland-uwsm < %{version}-%{release}
+# Quickshell before 0.3.2 (Fedora 44's 0.2.1 snapshot) crashes on 0.57's special workspaces, which have an address and no
+# id there: Nightdrive's bar and lock run on it. Nightdrive's stable setup takes only the Hyprland stack from this COPR,
+# not its quickshell, so dnf keeps such a machine on 0.56.2 instead of breaking its desktop.
+Conflicts:      quickshell < 0.3.2
 
 %description
 Hyprland is a dynamic tiling Wayland compositor with animations, configured in Lua.
@@ -131,6 +135,9 @@ rm -rf %{buildroot}%{_includedir}/glaze %{buildroot}%{_datadir}/glaze %{buildroo
 %{_datadir}/pkgconfig/hyprland.pc
 
 %changelog
+* Sat Nov 14 2026 Jari Lehtinen <jari@feature.fi> - 0.57.2-2
+- Conflicts with quickshell < 0.3.2, whose Hyprland IPC crashes on 0.57's special workspaces
+
 * Fri Nov 13 2026 Jari Lehtinen <jari@feature.fi> - 0.57.2-1
 - 0.57.2: needs hyprutils 0.14.3, aquamarine 0.16.0 and libcanberra; installs hyprland-session.target;
   hyprctl's shell completions are gone upstream (hyprpm keeps its own)
