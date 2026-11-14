@@ -1,0 +1,4 @@
+# The sha256 of Quickshell's downloaded sources, checked before the SRPM is made (tools/verify-sources.sh).
+# It matched Arch Linux's own on 14.11.2026: the sha256sums of the same git.outfoxxed.me archive in its PKGBUILD
+# (gitlab.archlinux.org/archlinux/packaging/packages/quickshell, pkgver 0.3.2).
+f14115a73c9fff6aa6399f924b632e88c3ce2cead2657f814a7825341f35baad  quickshell-0.3.2.tar.gz

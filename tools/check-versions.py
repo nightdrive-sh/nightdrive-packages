@@ -3,7 +3,8 @@
 Markdown list (nothing when all are current). Exit 0 either way; 2 when an upstream couldn't be read.
   tools/check-versions.py
 Upstream: the latest GitHub release (or tag) of the spec's github.com URL; Lua from lua.org's download list, within
-the spec's major.minor (lua5.5 stays 5.5.x). A library built into a package (Provides: bundled(NAME) = %{MACRO}, its
+the spec's major.minor (lua5.5 stays 5.5.x); a spec whose Source is a Forgejo archive (Quickshell's git.outfoxxed.me),
+that forge's highest version tag. A library built into a package (Provides: bundled(NAME) = %{MACRO}, its
 Source a github.com archive of that macro's version: wayvnc's neatvnc and aml, Hyprland's glaze) is checked too, within
 its major version: the package pins that major (Hyprland needs glaze 7), and a fix is released in it.
 GITHUB_TOKEN, if set, avoids the API's low anonymous rate limit."""
@@ -53,6 +54,13 @@ def bundled(spec):
     return found
 
 
+def forgejo_latest(host, repo):
+    """The highest version tag of a Forgejo (or Gitea) repo: its API answers as GitHub's tags list does."""
+    tags = [t["name"].lstrip("v") for t in json.loads(get(f"https://{host}/api/v1/repos/{repo}/tags?limit=50"))]
+    tags = [t for t in tags if re.fullmatch(r"\d+(\.\d+)*", t)]
+    return max(tags, key=key) if tags else None
+
+
 def lua_latest(major_minor):
     found = re.findall(r"lua-(%s\.\d+)\.tar\.gz" % re.escape(major_minor), get("https://www.lua.org/ftp/"))
     return max(found, key=key) if found else None
@@ -69,8 +77,11 @@ for path in sorted(glob.glob(os.path.join(ROOT, "*", "*.spec"))):
     name, version, url = field(spec, "Name"), field(spec, "Version"), field(spec, "URL")
     try:
         gh = re.match(r"https://github\.com/([^/]+/[^/]+?)/?$", url)
+        forge = re.search(r"^Source\d*:\s*https://(git\.outfoxxed\.me)/([^/]+/[^/]+)/archive/", spec, re.M)
         if gh:
             latest = github_latest(gh.group(1))
+        elif forge:
+            latest = forgejo_latest(forge.group(1), forge.group(2).replace("%{name}", name))
         elif "lua.org" in url:
             latest = lua_latest(".".join(version.split(".")[:2]))
         else:

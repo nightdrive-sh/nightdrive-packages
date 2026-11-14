@@ -41,6 +41,7 @@ Nightdrive's `install.sh` does this itself, with `includepkgs` limiting the repo
 | ghostty | 1.3.1 | Terminal (Install › Software › Terminals): not in Fedora or on Flathub |
 | deck | 0.1.1 | Nightdrive's Spotify player (the Deck app), so it isn't compiled on every machine |
 | wayvnc | 0.10.2 | VNC server for Nightdrive's VNC Display plugin: Fedora 44 has 0.9.1, which crashes on Hyprland |
+| quickshell | 0.3.2 | The toolkit Nightdrive's bar, menus and apps run on: Fedora 44's 0.2.1 snapshot crashes on Hyprland 0.57 |
 
 Each lives in its own folder as `<name>/<name>.spec`. The sources are downloaded from the spec's `Source` URLs, so the
 repo holds only specs. Ghostty's Zig dependencies can't be: `ghostty/sources.sh` fetches them when the SRPM is made, and
@@ -48,7 +49,10 @@ the build uses Zig's own release of the version Ghostty needs (Fedora's is newer
 same way (`deck/sources.sh`), as COPR's builds have no network. wayvnc has neatvnc and aml built in (meson subprojects, static,
 versions at the top of its spec): their 1.0 sonames would replace the ones Fedora's Weston needs. Its patch (Hyprland's
 black cursor off the output) is beside the spec, and `wayvnc/sources.sh` puts it with the sources. It leaves the COPR
-once Fedora's own wayvnc is 0.10 or later.
+once Fedora's own wayvnc is 0.10 or later. Quickshell's spec is Fedora's at 0.3.2, with upstream's fix after
+it (a patch beside the spec) and no crash handler (cpptrace isn't in Fedora). It uses Qt's private API, so it requires
+the exact Qt version it was built with: a Fedora Qt update makes it uninstallable (the weekly check's broken
+dependencies) and holds Qt back until it is rebuilt here. It leaves the COPR once Fedora's own is 0.3.2 or later.
 
 Each package's downloaded sources are checked against its `<name>/sources.sha256` before the SRPM is made
 (`tools/verify-sources.sh`): an upstream archive that was re-tagged or replaced stops the build. The file's comment
@@ -77,7 +81,7 @@ done
 A GitHub Actions workflow (`.github/workflows/check.yml`, Mondays, or by hand under Actions) keeps an issue open for
 each of these until the next run finds nothing:
 
-- **Upstream updates:** releases newer than the specs (`tools/check-versions.py`), and of the libraries built into a
+- **Upstream updates:** releases newer than the specs (`tools/check-versions.py`; Quickshell's tags from its Forgejo), and of the libraries built into a
   package (its `Provides: bundled(…)`: neatvnc and aml in wayvnc, glaze in Hyprland) within their major version.
 - **Broken dependencies (aarch64 / x86_64):** packages in the COPR that can't be installed on Fedora any more
   (`dnf repoclosure`), usually a Fedora library update that changed its soname. They need a rebuild.
