@@ -53,6 +53,9 @@ once Fedora's own wayvnc is 0.10 or later. Quickshell's spec is Fedora's at 0.3.
 it (a patch beside the spec) and no crash handler (cpptrace isn't in Fedora). It uses Qt's private API, so it requires
 the exact Qt version it was built with: a Fedora Qt update makes it uninstallable (the weekly check's broken
 dependencies) and holds Qt back until it is rebuilt here. It leaves the COPR once Fedora's own is 0.3.2 or later.
+Hyprland carries one upstream fix from after its release, as a patch beside the spec (`hyprland/sources.sh` puts it
+with the sources): input capture's wheel ticks in value120 units (79d3046f), which Lan Mouse needs to scroll the right
+way on a Mac. It goes with Hyprland 0.58.
 
 Each package's downloaded sources are checked against its `<name>/sources.sha256` before the SRPM is made
 (`tools/verify-sources.sh`): an upstream archive that was re-tagged or replaced stops the build. The file's comment

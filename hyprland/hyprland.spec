@@ -8,7 +8,7 @@
 
 Name:           hyprland
 Version:        0.57.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 
 # Hyprland: BSD-3-Clause; bundled glaze (header-only, used by hyprpm/start-hyprland): MIT
@@ -16,6 +16,9 @@ License:        BSD-3-Clause AND MIT
 URL:            https://github.com/hyprwm/Hyprland
 Source0:        %{url}/archive/v%{version}/Hyprland-%{version}.tar.gz
 Source1:        https://github.com/stephenberry/glaze/archive/v%{glaze_version}/glaze-%{glaze_version}.tar.gz
+# Upstream 79d3046f (after 0.57.2): input capture sent a wheel tick as a continuous delta and as a value120 of that
+# same delta (15 instead of 120), so Lan Mouse's Mac scrolled the wrong way (Nightdrive #3594). Drop it at 0.58.
+Patch0:         hyprland-input-capture-wheel-value120.patch
 
 BuildRequires:  cmake >= 3.30
 BuildRequires:  gcc-c++
@@ -135,6 +138,10 @@ rm -rf %{buildroot}%{_includedir}/glaze %{buildroot}%{_datadir}/glaze %{buildroo
 %{_datadir}/pkgconfig/hyprland.pc
 
 %changelog
+* Wed Nov 25 2026 Jari Lehtinen <jari@feature.fi> - 0.57.2-3
+- Backport upstream 79d3046f: input capture forwards wheel ticks as value120 only (Lan Mouse scrolled
+  the wrong way on a Mac)
+
 * Sat Nov 14 2026 Jari Lehtinen <jari@feature.fi> - 0.57.2-2
 - Conflicts with quickshell < 0.3.2, whose Hyprland IPC crashes on 0.57's special workspaces
 

@@ -1,0 +1,35 @@
+From 79d3046f6c94f931905316c3431125427857285f Mon Sep 17 00:00:00 2001
+From: Adviser <cheetodeveloper@gmail.com>
+Date: Fri, 6 Nov 2026 18:22:24 +0000
+Subject: [PATCH] input-capture: forward wheel ticks in discrete axis units
+
+Forward wheel sources through axisValue120 using deltaDiscrete instead of sending continuous delta as a discrete value.
+
+For other sources, forward the continuous axis value and send an axis stop when it becomes zero. Keep the capture frame boundary after the axis event.
+---
+ src/managers/input/InputManager.cpp | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/src/managers/input/InputManager.cpp b/src/managers/input/InputManager.cpp
+index 4ed1886d97f..12d4bafbb09 100644
+--- a/src/managers/input/InputManager.cpp
++++ b/src/managers/input/InputManager.cpp
+@@ -998,11 +998,13 @@ void CInputManager::onMouseWheel(IPointer::SAxisEvent e, SP<IPointer> pointer) {
+     if (e.mouse)
+         recheckMouseWarpOnMouseInput();
+ 
+-    PROTO::inputCapture->axis(e.axis, e.delta);
+-    if (e.source == 0)
+-        PROTO::inputCapture->axisValue120(e.axis, e.delta);
+-    else if (e.delta == 0)
+-        PROTO::inputCapture->axisStop(e.axis);
++    if (e.source == WL_POINTER_AXIS_SOURCE_WHEEL)
++        PROTO::inputCapture->axisValue120(e.axis, e.deltaDiscrete);
++    else {
++        PROTO::inputCapture->axis(e.axis, e.delta);
++        if (e.delta == 0)
++            PROTO::inputCapture->axisStop(e.axis);
++    }
+     PROTO::inputCapture->frame();
+ 
+     Hotkeys::mgr()->onAxis();
