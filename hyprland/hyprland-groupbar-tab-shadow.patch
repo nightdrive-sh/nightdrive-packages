@@ -1,0 +1,208 @@
+Nightdrive: a grouped window's tabs (groupbar) get the windows' drop shadow
+
+The drop shadow is drawn around the window only: the groupbar is a decoration of its own, drawn over the
+window, so its tabs had none (Nightdrive #3731). The window's shadow decoration now also draws one under each
+tab, with decoration:shadow's values and the tabs' rounding, before the window and the groupbar are drawn.
+Not upstream; carried until Hyprland has an option for it.
+---
+diff --git a/src/render/decorations/CHyprDropShadowDecoration.cpp b/src/render/decorations/CHyprDropShadowDecoration.cpp
+index 1d936c0..13aff1d 100644
+--- a/src/render/decorations/CHyprDropShadowDecoration.cpp
++++ b/src/render/decorations/CHyprDropShadowDecoration.cpp
+@@ -1,4 +1,5 @@
+ #include "CHyprDropShadowDecoration.hpp"
++#include "CHyprGroupBarDecoration.hpp"
+ #include "../../desktop/view/window/WindowPresentation.hpp"
+ 
+ #include <algorithm>
+@@ -194,18 +195,43 @@ SShadowRenderData CHyprDropShadowDecoration::getRenderData(Render::CRenderContex
+     // scale the box in relation to the center of the box
+     fullBox.scaleFromCenter(SHADOWSCALE).translate({(*PSHADOWOFFSET).x, (*PSHADOWOFFSET).y});
+ 
++    // Nightdrive: a grouped window's tabs (groupbar) get the same shadow, each tab its own, drawn here under the window
++    // as the groupbar draws over it. The extents grow to cover them, so moving the window damages their shadows too.
++    m_tabShadows.clear();
++    CBox extentsBox = fullBox;
++    if (const auto GROUPBAR = PWINDOW->presentation().decoration(DECORATION_GROUPBAR)) {
++        auto* const BAR = sc<CHyprGroupBarDecoration*>(GROUPBAR.get());
++        for (const auto& TAB : BAR->tabBoxes(pMonitor, presentation)) {
++            CBox shadowBox = TAB.copy().expand(*PSHADOWSIZE);
++            shadowBox.scaleFromCenter(SHADOWSCALE).translate({(*PSHADOWOFFSET).x, (*PSHADOWOFFSET).y});
++            if (shadowBox.width < 1 || shadowBox.height < 1)
++                continue;
++
++            const double X1 = std::min(extentsBox.x, shadowBox.x), Y1 = std::min(extentsBox.y, shadowBox.y);
++            const double X2 = std::max(extentsBox.x + extentsBox.w, shadowBox.x + shadowBox.w), Y2 = std::max(extentsBox.y + extentsBox.h, shadowBox.y + shadowBox.h);
++            extentsBox      = {X1, Y1, X2 - X1, Y2 - Y1};
++
++            m_tabShadows.push_back({
++                .shadowBox     = shadowBox.translate(presentation.floatingOffset).scale(pMonitor->m_scale).round(),
++                .tabBox        = TAB.copy().translate(presentation.floatingOffset).scale(pMonitor->m_scale).round(),
++                .rounding      = BAR->tabRounding(),
++                .roundingPower = BAR->tabRoundingPower(),
++            });
++        }
++    }
++
+     updateWindow(PWINDOW);
+     m_lastWindowPos += WORKSPACEOFFSET;
+     m_extents = {
+         .topLeft =
+             {
+-                m_lastWindowPos.x - fullBox.x - pMonitor->m_position.x + 2,
+-                m_lastWindowPos.y - fullBox.y - pMonitor->m_position.y + 2,
++                m_lastWindowPos.x - extentsBox.x - pMonitor->m_position.x + 2,
++                m_lastWindowPos.y - extentsBox.y - pMonitor->m_position.y + 2,
+             },
+         .bottomRight =
+             {
+-                fullBox.x + fullBox.width + pMonitor->m_position.x - m_lastWindowPos.x - m_lastWindowSize.x + 2,
+-                fullBox.y + fullBox.height + pMonitor->m_position.y - m_lastWindowPos.y - m_lastWindowSize.y + 2,
++                extentsBox.x + extentsBox.width + pMonitor->m_position.x - m_lastWindowPos.x - m_lastWindowSize.x + 2,
++                extentsBox.y + extentsBox.height + pMonitor->m_position.y - m_lastWindowPos.y - m_lastWindowSize.y + 2,
+             },
+     };
+ 
+@@ -252,9 +278,40 @@ void CHyprDropShadowDecoration::render(Render::CRenderContext& ctx, PHLMONITOR p
+     else
+         drawShadowInternal(ctx, data.fullBox, data.rounding * pMonitor->m_scale, data.roundingPower, data.size * pMonitor->m_scale, GRADIENT.current, a, presentation);
+ 
++    drawTabShadows(ctx, pMonitor, a, data.size * pMonitor->m_scale, presentation);
++
+     reposition(ctx);
+ }
+ 
++// Nightdrive: the tabs' shadows. The shadow shader fills its whole box and cuts out only the window, so the tab itself
++// is left out of the damage it draws in (all but its rounded corners' squares): a see-through tab isn't darkened. The
++// window stays cut out (currentWindow, set by getRenderData), so the shadow below the tabs doesn't darken it either.
++void CHyprDropShadowDecoration::drawTabShadows(Render::CRenderContext& ctx, PHLMONITOR pMonitor, float a, int range, const Render::SWindowRenderPresentation& presentation) {
++    if (m_tabShadows.empty())
++        return;
++
++    const auto    GRADIENT = m_gradient.renderState();
++    const CRegion DAMAGE   = ctx.m_data.damage;
++
++    for (const auto& TAB : m_tabShadows) {
++        const double R      = std::min<double>(TAB.rounding, std::min(TAB.tabBox.w, TAB.tabBox.h) / 2.0);
++        CRegion      inside = CRegion{CBox{TAB.tabBox.x + R, TAB.tabBox.y, TAB.tabBox.w - 2 * R, TAB.tabBox.h}};
++        inside.add(CBox{TAB.tabBox.x, TAB.tabBox.y + R, TAB.tabBox.w, TAB.tabBox.h - 2 * R});
++        ctx.m_data.renderModif.applyToRegion(inside);
++
++        ctx.m_data.damage = DAMAGE.copy().subtract(inside);
++        if (ctx.m_data.damage.empty())
++            continue;
++
++        if (GRADIENT.transitioning)
++            drawShadowInternal(ctx, TAB.shadowBox, TAB.rounding, TAB.roundingPower, range, GRADIENT.previous, GRADIENT.current, GRADIENT.progress, a, presentation);
++        else
++            drawShadowInternal(ctx, TAB.shadowBox, TAB.rounding, TAB.roundingPower, range, GRADIENT.current, a, presentation);
++    }
++
++    ctx.m_data.damage = DAMAGE;
++}
++
+ eDecorationLayer CHyprDropShadowDecoration::getDecorationLayer() {
+     return DECORATION_LAYER_BOTTOM;
+ }
+diff --git a/src/render/decorations/CHyprDropShadowDecoration.hpp b/src/render/decorations/CHyprDropShadowDecoration.hpp
+index 8fe7607..8461ff8 100644
+--- a/src/render/decorations/CHyprDropShadowDecoration.hpp
++++ b/src/render/decorations/CHyprDropShadowDecoration.hpp
+@@ -62,6 +62,16 @@ class CHyprDropShadowDecoration : public IHyprWindowDecoration {
+     void drawShadowInternal(Render::CRenderContext& ctx, const CBox& box, int round, float roundingPower, int range, const Config::CGradientValueData& grad1,
+                             const Config::CGradientValueData& grad2, float lerp, float a, const Render::SWindowRenderPresentation& presentation);
+ 
++    // Nightdrive: a grouped window's tabs (groupbar) and their shadows' boxes, physical px, from getRenderData()
++    struct STabShadow {
++        CBox  shadowBox;
++        CBox  tabBox;
++        int   rounding      = 0;
++        float roundingPower = 2;
++    };
++    std::vector<STabShadow> m_tabShadows;
++    void                    drawTabShadows(Render::CRenderContext& ctx, PHLMONITOR, float a, int range, const Render::SWindowRenderPresentation& presentation);
++
+     CBox m_lastWindowBox          = {0};
+     CBox m_lastWindowBoxWithDecos = {0};
+ };
+diff --git a/src/render/decorations/CHyprGroupBarDecoration.cpp b/src/render/decorations/CHyprGroupBarDecoration.cpp
+index 5a40e98..4e8db0b 100644
+--- a/src/render/decorations/CHyprGroupBarDecoration.cpp
++++ b/src/render/decorations/CHyprGroupBarDecoration.cpp
+@@ -276,6 +276,59 @@ void CHyprGroupBarDecoration::draw(Render::CRenderContext& ctx, PHLMONITOR pMoni
+         invalidateTextures();
+ }
+ 
++std::vector<CBox> CHyprGroupBarDecoration::tabBoxes(PHLMONITOR pMonitor, const Render::SWindowRenderPresentation& presentation) {
++    static auto       PRENDERTITLES    = CConfigValue<Config::INTEGER>("group:groupbar:render_titles");
++    static auto       PHEIGHT          = CConfigValue<Config::INTEGER>("group:groupbar:height");
++    static auto       PINDICATORGAP    = CConfigValue<Config::INTEGER>("group:groupbar:indicator_gap");
++    static auto       PINDICATORHEIGHT = CConfigValue<Config::INTEGER>("group:groupbar:indicator_height");
++    static auto       PGRADIENTS       = CConfigValue<Config::INTEGER>("group:groupbar:gradients");
++    static auto       PSTACKED         = CConfigValue<Config::INTEGER>("group:groupbar:stacked");
++    static auto       POUTERGAP        = CConfigValue<Config::INTEGER>("group:groupbar:gaps_out");
++    static auto       PINNERGAP        = CConfigValue<Config::INTEGER>("group:groupbar:gaps_in");
++
++    std::vector<CBox> boxes;
++    const int         BARS = m_dwGroupMembers.size();
++    // only what draw() fills casts a shadow: the gradient (the tab) and the indicator line, not the titles alone
++    if (BARS == 0 || !visible() || (!*PGRADIENTS && *PINDICATORHEIGHT <= 0))
++        return boxes;
++
++    const auto  ASSIGNEDBOX  = assignedBoxGlobal(presentation);
++    const auto  ONEBARHEIGHT = *POUTERGAP + *PINDICATORHEIGHT + *PINDICATORGAP + (*PGRADIENTS || *PRENDERTITLES ? *PHEIGHT : 0);
++    const float BARWIDTH     = *PSTACKED ? ASSIGNEDBOX.w : (ASSIGNEDBOX.w - *PINNERGAP * (BARS - 1)) / BARS;
++
++    float       xoff = 0;
++    float       yoff = 0;
++    for (int i = 0; i < BARS; ++i) {
++        // the same rects as draw(): the gradient's top, down to the indicator's bottom when there is one
++        const double BASEY  = ASSIGNEDBOX.y + ASSIGNEDBOX.h - std::floor(yoff) - pMonitor->m_position.y;
++        const double TOP    = *PGRADIENTS ? BASEY - ONEBARHEIGHT : BASEY - *PINDICATORHEIGHT - *POUTERGAP;
++        const double BOTTOM = *PINDICATORHEIGHT > 0 ? BASEY - *POUTERGAP : TOP + *PHEIGHT;
++        if (BOTTOM > TOP && BARWIDTH > 0)
++            boxes.emplace_back(ASSIGNEDBOX.x + xoff - pMonitor->m_position.x, TOP, BARWIDTH, BOTTOM - TOP);
++
++        if (*PSTACKED)
++            yoff += ONEBARHEIGHT;
++        else
++            xoff += *PINNERGAP + BARWIDTH;
++    }
++
++    return boxes;
++}
++
++int CHyprGroupBarDecoration::tabRounding() {
++    static auto PGRADIENTS        = CConfigValue<Config::INTEGER>("group:groupbar:gradients");
++    static auto PROUNDING         = CConfigValue<Config::INTEGER>("group:groupbar:rounding");
++    static auto PGRADIENTROUNDING = CConfigValue<Config::INTEGER>("group:groupbar:gradient_rounding");
++    return *PGRADIENTS ? *PGRADIENTROUNDING : *PROUNDING;
++}
++
++float CHyprGroupBarDecoration::tabRoundingPower() {
++    static auto PGRADIENTS             = CConfigValue<Config::INTEGER>("group:groupbar:gradients");
++    static auto PROUNDINGPOWER         = CConfigValue<Config::FLOAT>("group:groupbar:rounding_power");
++    static auto PGRADIENTROUNDINGPOWER = CConfigValue<Config::FLOAT>("group:groupbar:gradient_rounding_power");
++    return *PGRADIENTS ? *PGRADIENTROUNDINGPOWER : *PROUNDINGPOWER;
++}
++
+ CTitleTex* CHyprGroupBarDecoration::textureFromTitle(const std::string& title) {
+     for (auto const& tex : m_titleTexs.titleTexs) {
+         if (tex->m_content == title)
+diff --git a/src/render/decorations/CHyprGroupBarDecoration.hpp b/src/render/decorations/CHyprGroupBarDecoration.hpp
+index 6b2afb1..bf4c669 100644
+--- a/src/render/decorations/CHyprGroupBarDecoration.hpp
++++ b/src/render/decorations/CHyprGroupBarDecoration.hpp
+@@ -48,6 +48,12 @@ class CHyprGroupBarDecoration : public IHyprWindowDecoration {
+ 
+     virtual std::string                getDisplayName() override;
+ 
++    // Nightdrive: each tab's box as draw() places it (monitor-local logical px, without the floating offset), and the
++    // tabs' rounding (physical px, as draw() uses it), so the window's drop shadow can draw under the tabs too
++    std::vector<CBox>                  tabBoxes(PHLMONITOR, const Render::SWindowRenderPresentation& presentation);
++    int                                tabRounding();
++    float                              tabRoundingPower();
++
+   private:
+     CBox                      m_assignedBox = {0};
+ 

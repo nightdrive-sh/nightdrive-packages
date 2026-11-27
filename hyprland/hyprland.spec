@@ -8,7 +8,7 @@
 
 Name:           hyprland
 Version:        0.57.2
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 
 # Hyprland: BSD-3-Clause; bundled glaze (header-only, used by hyprpm/start-hyprland): MIT
@@ -23,6 +23,9 @@ Patch0:         hyprland-input-capture-wheel-value120.patch
 # refresh allocated its framebuffer anyway and aborted, so a USB-C display the DCP rejected crashed Hyprland in a
 # loop, safe mode too (Nightdrive #3710). Drop it at 0.58.
 Patch1:         hyprland-propRefresher-modeless-monitor.patch
+# Nightdrive's own, not upstream: a grouped window's tabs (groupbar) get the windows' drop shadow, each tab its own, with
+# decoration:shadow's values (Nightdrive #3731). Hyprland has no option for it; keep it until it does.
+Patch2:         hyprland-groupbar-tab-shadow.patch
 
 BuildRequires:  cmake >= 3.30
 BuildRequires:  gcc-c++
@@ -142,6 +145,9 @@ rm -rf %{buildroot}%{_includedir}/glaze %{buildroot}%{_datadir}/glaze %{buildroo
 %{_datadir}/pkgconfig/hyprland.pc
 
 %changelog
+* Fri Nov 27 2026 Jari Lehtinen <jari@feature.fi> - 0.57.2-5
+- Draw the windows' drop shadow under each tab of a window group (groupbar), which had none
+
 * Fri Nov 27 2026 Jari Lehtinen <jari@feature.fi> - 0.57.2-4
 - Backport upstream 1aa477bed3: skip a monitor without a mode when refreshing blur framebuffers (a display
   with no working mode crashed Hyprland in a loop)
