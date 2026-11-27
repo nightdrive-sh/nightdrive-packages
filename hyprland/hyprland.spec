@@ -8,7 +8,7 @@
 
 Name:           hyprland
 Version:        0.57.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Dynamic tiling Wayland compositor
 
 # Hyprland: BSD-3-Clause; bundled glaze (header-only, used by hyprpm/start-hyprland): MIT
@@ -19,6 +19,10 @@ Source1:        https://github.com/stephenberry/glaze/archive/v%{glaze_version}/
 # Upstream 79d3046f (after 0.57.2): input capture sent a wheel tick as a continuous delta and as a value120 of that
 # same delta (15 instead of 120), so Lan Mouse's Mac scrolled the wrong way (Nightdrive #3594). Drop it at 0.58.
 Patch0:         hyprland-input-capture-wheel-value120.patch
+# Upstream 1aa477bed3 (after 0.57.2): a monitor that gets no working mode stays enabled at 0x0, and the next blur
+# refresh allocated its framebuffer anyway and aborted, so a USB-C display the DCP rejected crashed Hyprland in a
+# loop, safe mode too (Nightdrive #3710). Drop it at 0.58.
+Patch1:         hyprland-propRefresher-modeless-monitor.patch
 
 BuildRequires:  cmake >= 3.30
 BuildRequires:  gcc-c++
@@ -138,6 +142,10 @@ rm -rf %{buildroot}%{_includedir}/glaze %{buildroot}%{_datadir}/glaze %{buildroo
 %{_datadir}/pkgconfig/hyprland.pc
 
 %changelog
+* Fri Nov 27 2026 Jari Lehtinen <jari@feature.fi> - 0.57.2-4
+- Backport upstream 1aa477bed3: skip a monitor without a mode when refreshing blur framebuffers (a display
+  with no working mode crashed Hyprland in a loop)
+
 * Wed Nov 25 2026 Jari Lehtinen <jari@feature.fi> - 0.57.2-3
 - Backport upstream 79d3046f: input capture forwards wheel ticks as value120 only (Lan Mouse scrolled
   the wrong way on a Mac)
